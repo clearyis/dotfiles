@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# Present options using Tofi
+action=$(echo -e "Enable Bluetooth\nDisable Bluetooth" | tofi --prompt "Bluetooth Action: ")
+
+# Perform action based on selection
+case "$action" in
+    "Enable Bluetooth")
+        bluetoothctl power on
+        ;;
+    "Disable Bluetooth")
+        bluetoothctl power off
+        ;;
+    *)
+        # If canceled or invalid input, do nothing
+        ;;
+esac
+

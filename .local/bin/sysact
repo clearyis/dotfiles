@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# Define the options
+options=" Lock\n󰩈 Logout\n󰒲 Sleep\n󱣻 Hibernate\n Reboot\n⏻ Shutdown"
+
+# Use Tofi to select one
+choice=$(echo -e "$options" | tofi)
+
+echo "You selected: '$choice'"
+
+# Execute the corresponding action
+case "$choice" in
+    "󰩈 Logout")
+        hyprctl dispatch exit
+        ;;
+    " Lock")
+        hyprctl dispatch exec "hyprlock"  # Replace [your-lock-command] with the actual lock command, e.g., hyprlock
+        ;;
+    "󰒲 Sleep")
+        systemctl suspend
+        ;;
+    "󱣻 Hibernate")
+        systemctl hibernate
+        ;;
+    " Reboot")
+        systemctl reboot
+        ;;
+    "⏻ Shutdown")
+        systemctl poweroff
+        ;;
+    *)
+        echo "No valid option selected."
+        exit 1
+        ;;
+esac
+
+# Confirmation (optional)
+echo "$choice initiated."
+

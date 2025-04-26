@@ -1,0 +1,80 @@
+#!/bin/sh
+
+# A simplified UI for selecting monitors in Hyprland using hyprctl and tofi.
+
+# Function to retrieve connected monitors
+get_connected_monitors() {
+    wlr-randr | awk '/^[^[:space:]]/ {print $1}'
+}
+
+# Function to configure a single monitor
+configure_single_monitor() {
+    selected_monitor="$1"
+    
+    # Disable all monitors except the selected one
+    all_monitors=$(get_connected_monitors)
+    echo "$all_monitors" | while read -r monitor; do
+        if [ "$monitor" != "$selected_monitor" ]; then
+            hyprctl keyword monitor "$selected_monitor, preffered, auto, auto" && 
+            hyprctl keyword monitor "$monitor, disable"
+        fi
+    done
+
+    notify-send "Display Configuration" "Activated single monitor: $selected_monitor."
+}
+
+# Function to enable all monitors
+configure_all_monitors() {
+    selected_monitors=("$@")
+    
+    # Initialize the primary monitor at position (0,0)
+    primary_monitor="${selected_monitors[0]}"
+    hyprctl keyword monitor "$primary_monitor, preffered, auto, auto"
+    secondary_monitor="${selected_monitors[1]}"
+    hyprctl keyword monitor "$primary_monitor, preffered, auto-left, auto"
+  
+    notify-send "Display Configuration" "Enabled all connected monitors."
+}
+
+# Retrieve all connected monitors
+monitors=$(get_connected_monitors)
+
+# Count the number of connected monitors
+monitor_count=$(echo "$monitors" | wc -l)
+
+# If there's only one monitor, activate it automatically
+if [ "$monitor_count" -lt 2 ]; then
+    configure_single_monitor "$monitors"
+    postrun
+    notify-send "💻 Single Monitor Detected" "Using it in its optimal settings..."
+    exit
+fi
+
+# Prepare tofi options
+# Add an option "Use All Monitors" at the end
+menu_options=$(echo "$monitors")
+menu_options="$menu_options
+Use All Monitors"
+
+# Prompt user for selection using tofi
+chosen=$(echo "$menu_options" | tofi --prompt "Select display configuration:")
+
+# Handle user selection
+if [ "$chosen" = "Use All Monitors" ]; then
+    # Convert monitors to an array
+    IFS=$'\n' read -rd '' -a monitor_array <<<"$monitors"
+    configure_all_monitors "${monitor_array[@]}"
+elif echo "$monitors" | grep -q "^$chosen$"; then
+    configure_single_monitor "$chosen"
+else
+    notify-send "Display Configuration" "No valid selection made."
+    exit
+fi
+
+# Final notification
+if [ "$chosen" = "Use All Monitors" ]; then
+    notify-send "Display Configuration" "All monitors have been enabled."
+else
+    notify-send "Display Configuration" "Single monitor '$chosen' has been activated."
+fi
+

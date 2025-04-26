@@ -1,0 +1,100 @@
+* {
+    border:        none;
+    border-radius: 10;
+    font-family:   "ComicCodeLigaturesNerdFont";
+    font-size:     12px;
+    box-shadow:    none;
+    text-shadow:   none;
+    transition-duration: 0s;
+    margin-left: 2px;
+    margin-right: 2px;
+}
+
+window#waybar {
+    color: rgba(255, 255, 255, .6);
+    background-color: rgba(16, 16, 16, 0);
+    border-bottom: 0px solid rgba(53, 185, 171, 0.4);
+}
+
+window#waybar.solo {
+    color: rgba(255, 255, 255, .6);
+}
+
+#workspaces {
+    margin: 0 0px;
+    color: rgba(255, 255, 255, .6);
+}
+
+#custom-scratchpad {
+    margin: 0px	5px;
+    padding: 0px 5px;
+}
+
+#custom-gap {
+    color: rgba(191, 54, 38, 1);
+}
+
+#workspaces button {
+    padding: 0 0px;
+    margin: 0 0px;
+    color: rgba(255, 255, 255, .6);
+}
+
+#workspaces button.focused {
+    color: rgba(191, 54, 38, 1);
+}
+
+#workspaces button.visible {
+    color: rgba(191, 54, 38, 1);
+}
+
+#workspaces button.urgent {
+    color: rgba(33, 164, 223, 1);
+}
+
+#mode, 
+#battery, 
+#cpu, 
+#memory, 
+#network, 
+#bluetooth,
+#pulseaudio, 
+#idle_inhibitor, 
+#temperature,
+#custom-layout,
+#clock, 
+#backlight {
+    margin: 0px 6px 0px 6px;
+/*    min-width: 30px;*/
+}
+
+
+#battery.warning {
+    color: rgba(255, 210, 4, .6);
+    background-color: rgba(16, 16, 16, 0);
+}
+
+#battery.critical {
+    color: rgba(238, 46, 36, .6);
+    background-color: rgba(16, 16, 16, 0);
+}
+
+#battery.charging {
+    color: rgba(255, 255, 255, .6);
+    background-color: rgba(16, 16, 16, 0);
+}
+
+#bluetooth.disabled {
+    color: rgba(128, 128, 128, .6);
+    background-color: rgba(16, 16, 16, 0);
+}
+
+#bluetooth.off {
+    color: rgba(128, 128, 128, .6);
+    background-color: rgba(16, 16, 16, 0);
+}
+
+#bluetooth.connected {
+    color: rgba(115, 186, 37, .6);
+    background-color: rgba(16, 16, 16, 0);
+} 

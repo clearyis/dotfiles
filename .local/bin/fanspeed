@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# Define the power profiles
+options="󰌪 Quiet\n  Medium\n󰓅 Agile"
+
+# Use Tofi to select one
+choice=$(echo -e "$options" | tofi)
+
+# Check the choice and set the power profile using powerprofilesctl
+if [ "$choice" = "󰓅 Agile" ]; then
+    fw-fanctrl use very-agile
+elif [ "$choice" = "  Medium" ]; then
+    fw-fanctrl use medium 
+elif [ "$choice" = "󰌪 Quiet" ]; then
+    fw-fanctrl use quiet
+else
+    echo "No valid choice made."
+    exit 1
+fi
+
+# Confirm the selection
+echo "fw-fanctrl set to $choice"
+

@@ -1,0 +1,125 @@
+
+#!/bin/sh
+
+# A simplified UI for selecting monitors in Hyprland using wlr-randr, hyprctl keyword, and tofi.
+
+# Function to retrieve connected monitors using wlr-randr
+get_connected_monitors() {
+    # Extract lines that start without whitespace and capture the first word as monitor name
+    wlr-randr | awk '/^[^[:space:]]/ {print $1}'
+}
+
+configure_single_monitor() {
+    selected_monitor="$1"
+    
+    # Disable all monitors except the selected one
+    all_monitors=$(get_connected_monitors)
+    echo "$all_monitors" | while read -r monitor; do
+        if [ "$monitor" != "$selected_monitor" ]; then
+            hyprctl keyword monitor "$selected_monitor, preffered, auto, auto" && 
+            hyprctl keyword monitor "$monitor, disable"
+        else
+            hyprctl keyword monitor "$selected_monitor, preffered, auto, auto" 
+        fi
+    done
+
+    notify-send "Display Configuration" "Activated single monitor: $selected_monitor."
+}
+
+# Function to extend monitors to the right or left
+extend_monitors() {
+    selected_monitors=("$@")
+    direction="$2"  # 'left' or 'right'
+
+    # Initialize the primary monitor with 'auto' positioning
+    primary_monitor="${selected_monitors[0]}"
+    hyprctl keyword monitor "$primary_monitor, enable, auto, auto"
+
+    # Loop through the remaining monitors and extend them in the specified direction
+    for monitor in "${selected_monitors[@]:1}"; do
+        if [ "$direction" = "left" ]; then
+            # Extend to the left
+            hyprctl keyword monitor "$monitor, enable, auto-left, auto"
+        else
+            # Extend to the right (default)
+            hyprctl keyword monitor "$monitor, enable, auto-right, auto"
+        fi
+    done
+
+    notify-send "Display Configuration" "Monitors extended to the $direction."
+}
+
+# Function to enable all monitors with default extension to the right
+configure_all_monitors_default() {
+    selected_monitors=("$@")
+    extend_monitors "${selected_monitors[@]}" "right"
+}
+
+# Function for post-configuration tasks (currently empty)
+postrun() {
+    # Placeholder for any future tasks
+    :
+}
+
+# Retrieve all connected monitors
+monitors=$(get_connected_monitors)
+
+# Count the number of connected monitors
+monitor_count=$(echo "$monitors" | wc -w)
+
+# If there's only one monitor, activate it automatically
+if [ "$monitor_count" -lt 2 ]; then
+    configure_single_monitor "$monitors"
+    postrun
+    notify-send "💻 Single Monitor Detected" "Using it in its optimal settings..."
+    exit
+fi
+
+# Prepare tofi options
+# Add options for extending monitors to the left or right
+menu_options=$(echo "$monitors")
+menu_options="$menu_options
+Extend Left
+Extend Right
+Use All Monitors"
+
+# Prompt user for selection using tofi
+chosen=$(echo "$menu_options" | tofi --prompt "Select display configuration:")
+
+# Handle user selection
+case "$chosen" in
+    "Extend Left")
+        # Convert monitors to an array
+        IFS=$'\n' read -rd '' -a monitor_array <<<"$monitors"
+        extend_monitors "${monitor_array[@]}" "left"
+        ;;
+    "Extend Right")
+        # Convert monitors to an array
+        IFS=$'\n' read -rd '' -a monitor_array <<<"$monitors"
+        extend_monitors "${monitor_array[@]}" "right"
+        ;;
+    "Use All Monitors")
+        # Default to extending to the right
+        # Convert monitors to an array
+        IFS=$'\n' read -rd '' -a monitor_array <<<"$monitors"
+        configure_all_monitors_default "${monitor_array[@]}"
+        ;;
+    *)
+        # Assume a single monitor was selected
+        configure_single_monitor "$chosen"
+        ;;
+esac
+
+# Perform post-configuration tasks
+postrun
+
+# Final notification
+if [ "$chosen" = "Extend Left" ]; then
+    notify-send "Display Configuration" "Monitors have been extended to the left."
+elif [ "$chosen" = "Extend Right" ]; then
+    notify-send "Display Configuration" "Monitors have been extended to the right."
+elif [ "$chosen" = "Use All Monitors" ]; then
+    notify-send "Display Configuration" "All monitors have been enabled."
+else
+    notify-send "Display Configuration" "Single monitor '$chosen' has been activated."
+fi

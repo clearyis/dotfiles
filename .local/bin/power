@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# Define the power profiles
+options="󰌪 Power-Saver\n  Balanced\n󰓅 Performance"
+
+# Use Tofi to select one
+choice=$(echo -e "$options" | tofi)
+
+# Check the choice and set the power profile using powerprofilesctl
+if [ "$choice" = "󰓅 Performance" ]; then
+    powerprofilesctl set performance
+elif [ "$choice" = "  Balanced" ]; then
+    powerprofilesctl set balanced
+elif [ "$choice" = "󰌪 Power-Saver" ]; then
+    powerprofilesctl set power-saver
+else
+    echo "No valid choice made."
+    exit 1
+fi
+
+# Confirm the selection
+echo "Power profile set to $choice"
+

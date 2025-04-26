@@ -1,0 +1,1 @@
+alias zu='sudo zypper refresh && sudo zypper dup'
